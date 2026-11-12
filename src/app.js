@@ -51,6 +51,15 @@ export function createApp({ sessionStore } = {}) {
       maxAge: 24 * 60 * 60 * 1000,
     },
   }), router);
+  app.get('/', (req, res) => {
+    res.json({
+      status: 'success',
+      message: 'News Site API is running smoothly 🚀',
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+    });
+  });
+
   app.use((req, res) => res.status(404).json({ message: 'Not found' }));
   app.use(errorHandler);
   return app;
