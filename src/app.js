@@ -3,7 +3,7 @@ import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import helmet from 'helmet';
 import cors from 'cors';
-import { config, validateConfig } from './config.js';
+import { config, validateConfig, isAllowedOrigin } from './config.js';
 import router from './routes/index.js';
 import { errorHandler } from './utils/errors.js';
 
@@ -13,7 +13,16 @@ export function createApp({ sessionStore } = {}) {
   app.disable('x-powered-by');
   if (process.env.TRUST_PROXY_HOPS) app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS));
   app.use(helmet());
-  app.use(cors({ origin: config.origins, credentials: true }));
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (isAllowedOrigin(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
+    credentials: true,
+  }));
   app.use(express.json({ limit: '1mb' }));
   app.use('/uploads', express.static(config.uploads, {
     dotfiles: 'deny',

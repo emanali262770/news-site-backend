@@ -1,6 +1,6 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import Admin from '../models/Admin.js';
-import { config } from '../config.js';
+import { config, isAllowedOrigin } from '../config.js';
 import { fail } from '../utils/errors.js';
 
 export async function requireAdmin(req, res, next) {
@@ -19,7 +19,7 @@ export function csrfToken(req) {
 export function csrfProtection(req, res, next) {
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
   const origin = req.get('Origin');
-  if (origin && !config.origins.includes(origin)) throw fail(403, 'Origin not allowed');
+  if (origin && !isAllowedOrigin(origin)) throw fail(403, 'Origin not allowed');
   const supplied = req.get('X-CSRF-Token') || '';
   const expected = req.session.csrfToken || '';
   if (!expected || Buffer.byteLength(supplied) !== Buffer.byteLength(expected)

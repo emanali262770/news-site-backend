@@ -5,10 +5,23 @@ export const config = {
   secret: process.env.SESSION_SECRET,
   port: Number(process.env.PORT || 5000),
   production: process.env.NODE_ENV === 'production',
-  origins: (process.env.FRONTEND_ORIGIN || 'http://localhost:5173').split(',').map(value => new URL(value.trim()).origin),
+  origins: (process.env.FRONTEND_ORIGIN || 'http://localhost:5173').split(',').map(value => {
+    try {
+      return new URL(value.trim()).origin;
+    } catch {
+      return value.trim();
+    }
+  }),
   uploads: path.resolve(process.env.UPLOAD_DIR || 'uploads'),
   sameSite: process.env.COOKIE_SAME_SITE || 'lax',
 };
+
+export function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (config.origins.includes(origin)) return true;
+  if (/^https:\/\/news-site.*\.vercel\.app$/i.test(origin)) return true;
+  return false;
+}
 
 export function validateConfig() {
   if (!config.mongoUri) throw new Error('MONGODB_URI is required');
