@@ -49,6 +49,7 @@ export function createApp({ sessionStore } = {}) {
       secure: config.production,
       sameSite: config.sameSite,
       maxAge: 24 * 60 * 60 * 1000,
+      partitioned: config.sameSite === 'none',
     },
   }), router);
   app.get('/', (req, res) => {
