@@ -14,6 +14,11 @@ export const config = {
   }),
   uploads: path.resolve(process.env.UPLOAD_DIR || 'uploads'),
   sameSite: process.env.COOKIE_SAME_SITE || 'lax',
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET,
+  },
 };
 
 export function isAllowedOrigin(origin) {
