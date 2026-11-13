@@ -50,7 +50,8 @@ export async function sendWelcomeEmail(toEmail) {
     <body>
       <div class="container">
         <div class="header">
-          <h1>Stay Informed 📰</h1>
+          <h1 style="margin:0;font-size:24px;color:#ffffff;font-weight:bold;">Christian Monitor News</h1>
+          <p style="margin:5px 0 0 0;font-size:12px;color:#bfdbfe;letter-spacing:1px;text-transform:uppercase;">Voice of Oppressed</p>
         </div>
         <div class="content">
           <h2>Welcome to Our Community!</h2>
@@ -60,7 +61,7 @@ export async function sendWelcomeEmail(toEmail) {
         </div>
         <div class="footer">
           <p>You received this email because you subscribed on our website.</p>
-          <p>&copy; ${new Date().getFullYear()} News Site. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Christian Monitor News. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -69,9 +70,9 @@ export async function sendWelcomeEmail(toEmail) {
 
   try {
     await mailer.sendMail({
-      from: `"News Updates" <${config.email.from}>`,
+      from: `"Christian Monitor News" <${config.email.from}>`,
       to: toEmail,
-      subject: 'Welcome to News Updates! 🎉',
+      subject: 'Welcome to Christian Monitor News! 🎉',
       html,
     });
     console.log(`[Newsletter] Welcome email sent to ${toEmail}`);
@@ -121,7 +122,8 @@ export async function sendNewPostNotification(subscribers, post) {
       <div class="container">
         <div class="header">
           <span class="badge">Breaking News</span>
-          <h1>Latest Story Published</h1>
+          <h1 style="margin:5px 0 0 0;font-size:22px;color:#ffffff;font-weight:bold;">Christian Monitor News</h1>
+          <p style="margin:4px 0 0 0;font-size:11px;color:#bfdbfe;letter-spacing:1px;text-transform:uppercase;">Voice of Oppressed</p>
         </div>
         ${imageUrl ? `<img src="${imageUrl}" alt="${post.title}" class="post-image" />` : ''}
         <div class="content">
@@ -136,8 +138,8 @@ export async function sendNewPostNotification(subscribers, post) {
           </div>
         </div>
         <div class="footer">
-          <p>You are receiving this because you subscribed to our news updates.</p>
-          <p>&copy; ${new Date().getFullYear()} News Site. All rights reserved.</p>
+          <p>You are receiving this because you subscribed to Christian Monitor News updates.</p>
+          <p>&copy; ${new Date().getFullYear()} Christian Monitor News. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -152,7 +154,7 @@ export async function sendNewPostNotification(subscribers, post) {
   for (let i = 0; i < emailList.length; i += batchSize) {
     const batch = emailList.slice(i, i + batchSize);
     mailer.sendMail({
-      from: `"News Desk" <${config.email.from}>`,
+      from: `"Christian Monitor News" <${config.email.from}>`,
       to: config.email.from, // Primary to yourself
       bcc: batch,            // All subscribers hidden in BCC
       subject: `📰 ${post.title}`,
