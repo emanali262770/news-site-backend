@@ -6,6 +6,7 @@ import { fail } from '../utils/errors.js';
 import { listFilter, validatePost } from '../utils/postValidation.js';
 import { translateText } from '../utils/translator.js';
 import { sendNewPostNotification } from '../utils/mailer.js';
+import { deleteImage } from './uploadController.js';
 
 const summaryFields = 'slug title categoryId categories topic subtitle image author publishedAt readTime showOnHomepage translations';
 
@@ -266,6 +267,16 @@ export async function update(req, res) {
 
 export async function remove(req, res) {
   validatePostId(req.params.id);
-  if (!await Post.findByIdAndDelete(req.params.id)) throw fail(404, 'Post not found');
+  const post = await Post.findByIdAndDelete(req.params.id);
+  if (!post) throw fail(404, 'Post not found');
+
+  // Asynchronously clean up the image from Cloudinary (or local disk) and remove Image record
+  if (post.image) {
+    deleteImage(post.image).catch(err => console.error('[Cleanup] Failed to delete image from storage:', err.message));
+  }
+  if (post.imageId) {
+    Image.findByIdAndDelete(post.imageId).catch(() => {});
+  }
+
   res.status(204).end();
 }

@@ -33,6 +33,29 @@ function uploadToCloudinary(buffer) {
   });
 }
 
+export async function deleteImage(imageUrl) {
+  if (!imageUrl || typeof imageUrl !== 'string') return;
+
+  // 1. If it's a Cloudinary URL, destroy it from Cloudinary
+  if (imageUrl.includes('cloudinary.com')) {
+    const match = imageUrl.match(/\/upload\/(?:v\d+\/)?(.+?)\.[a-zA-Z0-9]+$/);
+    const publicId = match ? match[1] : null;
+    if (publicId && config.cloudinary.cloudName && config.cloudinary.apiKey && config.cloudinary.apiSecret) {
+      try {
+        await cloudinary.uploader.destroy(publicId);
+        console.log(`[Cloudinary] Deleted image: ${publicId}`);
+      } catch (err) {
+        console.error(`[Cloudinary] Failed to delete image ${publicId}:`, err.message);
+      }
+    }
+  } else if (imageUrl.startsWith('/uploads/')) {
+    // 2. If it's a local upload, remove from disk
+    const filename = path.basename(imageUrl);
+    const filePath = path.join(config.uploads, filename);
+    await unlink(filePath).catch(() => {});
+  }
+}
+
 export async function upload(req, res) {
   if (!req.file) throw fail(400, 'Image is required');
   let buffer;
