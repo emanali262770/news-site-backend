@@ -112,7 +112,7 @@ export async function sendNewPostNotification(subscribers, post) {
         .category { color: #38bdf8; font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
         .title { margin: 0 0 14px 0; font-size: 22px; line-height: 1.4; color: #ffffff; }
         .subtitle { color: #94a3b8; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
-        .button { display: inline-block; background: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 12px rgba(37,99,235,0.4); }
+        .button { display: inline-block; background-color: #2563eb !important; color: #ffffff !important; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 15px; }
         .footer { padding: 20px 24px; background: #0f172a; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #334155; }
         .meta { font-size: 13px; color: #64748b; margin-top: 20px; }
       </style>
@@ -128,7 +128,9 @@ export async function sendNewPostNotification(subscribers, post) {
           ${post.categoryId ? `<div class="category">• ${post.categoryId}</div>` : ''}
           <h2 class="title">${post.title}</h2>
           <p class="subtitle">${post.subtitle || ''}</p>
-          <a href="${postUrl}" class="button">Read Full Story &rarr;</a>
+          <a href="${postUrl}" class="button" style="display:inline-block;background-color:#2563eb;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:bold;font-size:15px;">
+            <span style="color:#ffffff !important;text-decoration:none;">Read Full Story &rarr;</span>
+          </a>
           <div class="meta">
             <span>By ${post.author || 'Editorial Desk'}</span> • <span>${post.readTime || '3 min read'}</span>
           </div>
