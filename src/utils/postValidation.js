@@ -4,7 +4,7 @@ import { fail } from './errors.js';
 const textLimits = {
   title: 250,
   categoryId: 40,
-  topic: 200,
+  topic: 1000,
   subtitle: 2000,
   imageId: 24,
   imageAlt: 500,
