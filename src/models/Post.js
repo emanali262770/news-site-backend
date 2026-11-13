@@ -13,6 +13,12 @@ const schema = new mongoose.Schema({
   title: { type: String, required: true, maxlength: 250 },
   slug: { type: String, required: true, unique: true, immutable: true },
   categoryId: { type: String, required: true, enum: categoryIds },
+  categories: {
+    type: [{ type: String, enum: categoryIds }],
+    default: function() {
+      return this.categoryId ? [this.categoryId] : [];
+    },
+  },
   topic: { type: String, default: '' },
   subtitle: { type: String, required: true },
   imageId: { type: mongoose.Schema.Types.ObjectId, ref: 'Image', required: true },
@@ -32,6 +38,7 @@ const schema = new mongoose.Schema({
 }, { timestamps: true });
 schema.index({ publishedAt: -1, _id: -1 });
 schema.index({ categoryId: 1, publishedAt: -1, _id: -1 });
+schema.index({ categories: 1, publishedAt: -1, _id: -1 });
 schema.index({ showOnHomepage: 1, publishedAt: -1, _id: -1 });
 
 export default mongoose.model('Post', schema);

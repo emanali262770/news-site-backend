@@ -18,11 +18,35 @@ export function validatePost(body, partial = false) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) throw fail(400, 'Post fields are required');
   const values = {};
   for (const key of Object.keys(body)) {
-    if (!Object.hasOwn(textLimits, key) && key !== 'showOnHomepage') throw fail(400, `Unknown field: ${key}`);
+    if (!Object.hasOwn(textLimits, key) && key !== 'showOnHomepage' && key !== 'categories' && key !== 'categoryIds') {
+      throw fail(400, `Unknown field: ${key}`);
+    }
   }
+
+  // Handle multiple categoryIds / categories array
+  const rawCategories = body.categories || body.categoryIds;
+  if (rawCategories !== undefined) {
+    if (!Array.isArray(rawCategories)) throw fail(400, 'categories must be an array');
+    const cleanedCategories = rawCategories.map(c => typeof c === 'string' ? c.trim() : '').filter(Boolean);
+    for (const cat of cleanedCategories) {
+      if (!categoryIds.includes(cat)) throw fail(400, `Invalid category: ${cat}`);
+    }
+    if (!partial && cleanedCategories.length === 0) {
+      throw fail(400, 'At least one category is required');
+    }
+    values.categories = cleanedCategories;
+    if (cleanedCategories.length > 0 && !body.categoryId) {
+      values.categoryId = cleanedCategories[0];
+    }
+  }
+
   for (const [key, max] of Object.entries(textLimits)) {
     if (body[key] === undefined) {
-      if (!partial && requiredFields.includes(key)) throw fail(400, `${key} is required`);
+      if (!partial && requiredFields.includes(key)) {
+        // If categoryId is missing but categories array provided, don't fail
+        if (key === 'categoryId' && values.categoryId) continue;
+        throw fail(400, `${key} is required`);
+      }
       continue;
     }
     if (typeof body[key] !== 'string') throw fail(400, `${key} must be text`);
@@ -31,6 +55,11 @@ export function validatePost(body, partial = false) {
     values[key] = value;
   }
   if (values.categoryId && !categoryIds.includes(values.categoryId)) throw fail(400, 'Invalid categoryId');
+  if (values.categories && values.categories.length > 0 && !values.categoryId) {
+    values.categoryId = values.categories[0];
+  } else if (values.categoryId && (!values.categories || values.categories.length === 0)) {
+    values.categories = [values.categoryId];
+  }
   if (values.imageId && !/^[a-f\d]{24}$/i.test(values.imageId)) throw fail(400, 'Invalid imageId');
   if (body.showOnHomepage !== undefined) {
     if (typeof body.showOnHomepage !== 'boolean') throw fail(400, 'showOnHomepage must be a boolean');

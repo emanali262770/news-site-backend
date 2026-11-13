@@ -7,7 +7,7 @@ import { listFilter, validatePost } from '../utils/postValidation.js';
 import { translateText } from '../utils/translator.js';
 import { sendNewPostNotification } from '../utils/mailer.js';
 
-const summaryFields = 'slug title categoryId topic subtitle image author publishedAt readTime showOnHomepage translations';
+const summaryFields = 'slug title categoryId categories topic subtitle image author publishedAt readTime showOnHomepage translations';
 
 function calculateTimeAgo(date) {
   if (!date) return '';
@@ -161,13 +161,23 @@ async function attachImageUrl(values) {
 export async function list(req, res) {
   const { page, limit, filter } = listFilter(req.query || {});
   const lang = sanitizeLang(req.query?.lang);
+
+  // If filtering by category, match either categoryId or any element in categories array
+  const queryFilter = { ...filter };
+  if (queryFilter.categoryId) {
+    const cat = queryFilter.categoryId;
+    queryFilter.$or = queryFilter.$or
+      ? [{ $or: [{ categoryId: cat }, { categories: cat }] }, { $or: queryFilter.$or }]
+      : [{ categoryId: cat }, { categories: cat }];
+  }
+
   const [posts, total] = await Promise.all([
-    Post.find(filter)
+    Post.find(queryFilter)
       .select(summaryFields)
       .sort({ publishedAt: -1, _id: -1 })
       .skip((page - 1) * limit)
       .limit(limit),
-    Post.countDocuments(filter),
+    Post.countDocuments(queryFilter),
   ]);
 
   const data = lang === 'en'
@@ -183,7 +193,14 @@ export async function list(req, res) {
 export async function detail(req, res) {
   const post = await Post.findOne({ slug: req.params.slug });
   if (!post) throw fail(404, 'Post not found');
-  const related = await Post.find({ categoryId: post.categoryId, _id: { $ne: post._id } })
+  const related = await Post.find({
+    categoryId: post.categoryId,
+    $or: [
+      { categoryId: post.categoryId },
+      { categories: { $in: post.categories && post.categories.length > 0 ? post.categories : [post.categoryId] } },
+    ],
+    _id: { $ne: post._id },
+  })
     .select(summaryFields)
     .sort({ publishedAt: -1, _id: -1 })
     .limit(2);
