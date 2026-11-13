@@ -41,7 +41,9 @@ async function translatePostDetail(doc, lang) {
   const translations = doc.translations;
   const cached = (translations instanceof Map ? translations.get(lang) : translations?.[lang]);
 
-  if (cached && cached.content) {
+  const isValidCache = cached && cached.content && (lang === 'en' || !doc.title || cached.title !== doc.title);
+
+  if (isValidCache) {
     if (cached.title) data.title = cached.title;
     if (cached.subtitle) data.subtitle = cached.subtitle;
     if (cached.content) data.content = cached.content;
@@ -87,15 +89,18 @@ async function translatePostDetail(doc, lang) {
   data.content = translated.content;
   if (data.caption !== undefined) data.caption = translated.caption;
 
-  try {
-    if (doc._id && Post.updateOne) {
-      await Post.updateOne(
-        { _id: doc._id },
-        { $set: { [`translations.${lang}`]: translated } }
-      );
+  const isSuccessfullyTranslated = !doc.title || translated.title !== doc.title;
+  if (isSuccessfullyTranslated) {
+    try {
+      if (doc._id && Post.updateOne) {
+        await Post.updateOne(
+          { _id: doc._id },
+          { $set: { [`translations.${lang}`]: translated } }
+        );
+      }
+    } catch (err) {
+      console.error(`Failed to cache translation [${lang}]:`, err.message);
     }
-  } catch (err) {
-    console.error(`Failed to cache translation [${lang}]:`, err.message);
   }
 
   return data;
@@ -108,7 +113,9 @@ async function translatePostSummary(doc, lang) {
   const translations = doc.translations;
   const cached = (translations instanceof Map ? translations.get(lang) : translations?.[lang]);
 
-  if (cached && cached.title) {
+  const isValidCache = cached && cached.title && (lang === 'en' || !doc.title || cached.title !== doc.title);
+
+  if (isValidCache) {
     if (cached.title) data.title = cached.title;
     if (cached.subtitle) data.subtitle = cached.subtitle;
 
@@ -147,15 +154,18 @@ async function translatePostSummary(doc, lang) {
   data.topic = translated.topic;
   data.subtitle = translated.subtitle;
 
-  try {
-    if (doc._id && Post.updateOne) {
-      await Post.updateOne(
-        { _id: doc._id },
-        { $set: { [`translations.${lang}`]: translated } }
-      );
+  const isSuccessfullyTranslated = !doc.title || translated.title !== doc.title;
+  if (isSuccessfullyTranslated) {
+    try {
+      if (doc._id && Post.updateOne) {
+        await Post.updateOne(
+          { _id: doc._id },
+          { $set: { [`translations.${lang}`]: translated } }
+        );
+      }
+    } catch (err) {
+      console.error(`Failed to cache summary translation [${lang}]:`, err.message);
     }
-  } catch (err) {
-    console.error(`Failed to cache summary translation [${lang}]:`, err.message);
   }
 
   return data;
