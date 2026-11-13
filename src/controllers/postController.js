@@ -162,13 +162,26 @@ export async function list(req, res) {
   const { page, limit, filter } = listFilter(req.query || {});
   const lang = sanitizeLang(req.query?.lang);
 
-  // If filtering by category, match either categoryId or any element in categories array
+  // If filtering by category, search in both primary categoryId AND categories array
   const queryFilter = { ...filter };
   if (queryFilter.categoryId) {
     const cat = queryFilter.categoryId;
-    queryFilter.$or = queryFilter.$or
-      ? [{ $or: [{ categoryId: cat }, { categories: cat }] }, { $or: queryFilter.$or }]
-      : [{ categoryId: cat }, { categories: cat }];
+    delete queryFilter.categoryId; // MUST delete to avoid restricting only to primary categoryId!
+
+    const categoryCondition = [
+      { categoryId: cat },
+      { categories: cat },
+    ];
+
+    if (queryFilter.$or) {
+      queryFilter.$and = [
+        { $or: categoryCondition },
+        { $or: queryFilter.$or },
+      ];
+      delete queryFilter.$or;
+    } else {
+      queryFilter.$or = categoryCondition;
+    }
   }
 
   const [posts, total] = await Promise.all([

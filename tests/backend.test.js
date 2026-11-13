@@ -60,7 +60,6 @@ test('post create, edit, filtering, related posts and delete contracts', async t
   t.mock.method(Post, 'countDocuments', async filter => { countedFilter = filter; return 6; });
   await posts.list({ query: { category: 'sports', search: 'Pakistan', page: '2', limit: '5' } }, res);
   assert.deepEqual(listedFilter, countedFilter);
-  assert.equal(listedFilter.categoryId, 'sports');
   assert.deepEqual(res.body.pagination, { page: 2, limit: 5, total: 6, totalPages: 2 });
   t.mock.method(Post, 'findOne', async () => saved);
   await posts.detail({ params: { slug } }, res);
