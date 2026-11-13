@@ -32,8 +32,12 @@ const serializePost = doc => {
 
 function sanitizeLang(lang) {
   if (!lang || typeof lang !== 'string') return 'en';
-  const clean = lang.trim().toLowerCase();
-  return /^[a-z]{2,3}(-[a-z0-9]+)?$/i.test(clean) ? clean : 'en';
+  const clean = lang.trim();
+  // Automatically map standard Punjabi 'pa' to Shahmukhi Punjabi (Arabic/Urdu script)
+  if (clean.toLowerCase() === 'pa' || clean.toLowerCase() === 'punjabi') {
+    return 'pa-Arab';
+  }
+  return /^[a-z]{2,3}(-[a-z0-9]+)?$/i.test(clean) ? clean.toLowerCase() : 'en';
 }
 
 async function translatePostDetail(doc, lang) {
