@@ -3,6 +3,7 @@ import multer from 'multer';
 import { rateLimit } from 'express-rate-limit';
 import * as auth from '../controllers/authController.js';
 import * as posts from '../controllers/postController.js';
+import * as newsletter from '../controllers/newsletterController.js';
 import { upload } from '../controllers/uploadController.js';
 import { requireAdmin, csrfProtection } from '../middleware/auth.js';
 import { categories } from '../constants/categories.js';
@@ -38,5 +39,8 @@ router.patch('/posts/:id', requireAdmin, csrfProtection, posts.update);
 router.delete('/posts/:id', requireAdmin, csrfProtection, posts.remove);
 
 router.post('/uploads/images', requireAdmin, csrfProtection, imageUpload, upload);
+
+router.post('/newsletter/subscribe', newsletter.subscribe);
+router.post('/newsletter/unsubscribe', newsletter.unsubscribe);
 
 export default router;

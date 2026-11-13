@@ -1,9 +1,11 @@
 import { randomBytes } from 'node:crypto';
 import Post from '../models/Post.js';
 import Image from '../models/Image.js';
+import Subscriber from '../models/Subscriber.js';
 import { fail } from '../utils/errors.js';
 import { listFilter, validatePost } from '../utils/postValidation.js';
 import { translateText } from '../utils/translator.js';
+import { sendNewPostNotification } from '../utils/mailer.js';
 
 const summaryFields = 'slug title categoryId topic subtitle image author publishedAt readTime showOnHomepage translations';
 
@@ -201,6 +203,17 @@ export async function create(req, res) {
     slug: createSlug(values.title),
     readTime: calculateReadTime(values.content),
   });
+
+  // Notify all active subscribers in the background without slowing down the response
+  Subscriber.find({ isActive: true })
+    .select('email')
+    .then(subscribers => {
+      if (subscribers && subscribers.length > 0) {
+        sendNewPostNotification(subscribers, post);
+      }
+    })
+    .catch(err => console.error('[Newsletter] Notification trigger error:', err.message));
+
   res.status(201).json(serializePost(post));
 }
 

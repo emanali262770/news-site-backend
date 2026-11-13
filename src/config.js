@@ -19,6 +19,11 @@ export const config = {
     apiKey: process.env.CLOUDINARY_API_KEY,
     apiSecret: process.env.CLOUDINARY_API_SECRET,
   },
+  email: {
+    user: process.env.SMTP_USER || process.env.EMAIL_USER,
+    pass: process.env.SMTP_PASS || process.env.EMAIL_PASS,
+    from: process.env.EMAIL_FROM || process.env.SMTP_USER || 'noreply@news-site.com',
+  },
 };
 
 export function isAllowedOrigin(origin) {

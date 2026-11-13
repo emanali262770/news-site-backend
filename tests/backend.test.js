@@ -26,6 +26,10 @@ test('post create, edit, filtering, related posts and delete contracts', async t
   let saved;
   t.mock.method(Image, 'findById', async () => ({ url: '/uploads/example.webp' }));
   t.mock.method(Post, 'create', async values => (saved = new Post(values)));
+  const { default: Subscriber } = await import('../src/models/Subscriber.js');
+  t.mock.method(Subscriber, 'find', () => ({
+    select: () => Promise.resolve([])
+  }));
   const res = { statusCode: 200, body: null, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; }, end() {} };
   await posts.create({ body: payload }, res);
   assert.equal(res.statusCode, 201);
